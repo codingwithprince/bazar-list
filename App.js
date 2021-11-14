@@ -1,5 +1,6 @@
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, FlatList, SafeAreaView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 
 
@@ -10,9 +11,41 @@ const COLORS = {
 
 export default function App() {
   const [textInput, setTextInput] = React.useState('');
-  const [list, setList] = React.useState([{id:1, task:'fist list', completed: true},
-  {id:2, task:'second list', completed: false}
-]);
+  const [list, setList] = React.useState([]);
+
+React.useEffect(()=>{
+  getListFromUserDevice(list);
+}, [])
+
+React.useEffect(()=>{
+  saveListToUsersDevice(list);
+},[list])
+
+
+// saving list items to users device
+const saveListToUsersDevice = async list =>{
+  try{
+    const stringifyList = JSON.stringify(list);
+    await AsyncStorage.setItem('lists', stringifyList);
+  }
+  catch(e){
+    console.log("Trouble from saving list to devices.",e);
+  }
+  
+}
+
+const getListFromUserDevice = async () =>{
+  try{
+    const lists = await AsyncStorage.getItem('lists');
+    if(lists != null){
+      setList(JSON.parse(lists))
+    }
+  } catch (error){
+    console.log('trouble in getting lists from user devices.',error);
+  }
+}
+
+
 
 // adding new item to list
 const addToList = () =>{
@@ -54,15 +87,16 @@ const clearAllItems = () =>{
     {text:'Yes', onPress: ()=> {setList([])}}
   
 ])
-
 }
+
 
 // ListItem's components
 const ListItem = ({list}) =>{
   return <View style={styles.listItem}>
           <View style={{flex:1}}>
-            <Text style={{fontSize:13,textTransform:'capitalize', 
+            <Text style={{fontSize:15,textTransform:'capitalize', 
                 color:COLORS.primary, 
+                fontWeight:'normal',
                 textDecorationLine: list?.completed?"line-through":"none"}}
                 >{list?.task}</Text>
           </View>
@@ -85,7 +119,7 @@ const ListItem = ({list}) =>{
           Bazar list
         </Text>
         {
-          list != '' && <Icon name="delete" size={23} color='red' onPress={()=> clearAllItems() } />
+          list != '' && <Icon  name="delete" size={23} color='red' onPress={()=> clearAllItems() } />
         }
         
       </View>
@@ -120,13 +154,13 @@ const styles = StyleSheet.create({
   container: {
     marginTop:30,
     flex: 1,
-    backgroundColor: COLORS.white
+    backgroundColor: '#ffdd00'
   },
   header:{
     alignItems:'center',
     padding:15,
     flexDirection:'row',
-    justifyContent:'space-between'
+    justifyContent:'space-between',
   },
   headerText:{
     fontSize:20,
@@ -137,17 +171,19 @@ const styles = StyleSheet.create({
     width:'100%',
     position:"absolute",
     bottom:0,
+    backgroundColor: '#ffdd00',
     flexDirection:'row',
     alignItems:'center',
-    paddingHorizontal: 20
+    paddingHorizontal: 12,
+    elevation:40
   },
   inputContainer:{
     height:50,
     backgroundColor: COLORS.white,
     flex: 1,
     paddingHorizontal:20,
-    marginVertical: 20,
-    marginRight:20,
+    marginVertical: 10,
+    marginRight:10,
     borderRadius:30,
     elevation:3,
     justifyContent:'center'
@@ -158,7 +194,8 @@ const styles = StyleSheet.create({
     backgroundColor:COLORS.primary,
     borderRadius:25,
     alignItems:"center",
-    justifyContent:"center"
+    justifyContent:"center",
+    elevation:10
   },
   listItem:{
     padding:15,
