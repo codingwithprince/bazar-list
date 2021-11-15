@@ -1,7 +1,8 @@
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert, FlatList, SafeAreaView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import {AutoScrollFlatList} from "react-native-autoscroll-flatlist";
+import { Alert, FlatList, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 
 
 const COLORS = {
@@ -110,7 +111,6 @@ const ListItem = ({list}) =>{
           </TouchableOpacity>
         </View>
 }
-
   return (
     <SafeAreaView style={styles.container}>
       {/* === header === */}
@@ -121,29 +121,38 @@ const ListItem = ({list}) =>{
         {
           list != '' && <Icon  name="delete" size={23} color='red' onPress={()=> clearAllItems() } />
         }
-        
       </View>
-      {/* === List items === */}
-      <FlatList
-      contentContainerStyle={{paddingBottom:100}}
-      data={list}
-      renderItem={({item})=> <ListItem list={item} /> }
-      />
+      {/* === only when list is empty === */}
 
+      {
+        list == '' &&  <View style={styles.emptyContainer}> 
+                          <Text style={{fontSize: 20, color: '#555'}}>No Items</Text>
+                       </View>
+      }
+     
+      {/* === List items === */}
+      
+      <AutoScrollFlatList
+          showsVerticalScrollIndicator={false}
+          data={list}
+          renderItem={({item})=> <ListItem list={item} /> }
+          contentContainerStyle={{paddingBottom:120}}
+      />
+    
       {/* === footer === */}
-      <View style={styles.footer}>
-        <View style={styles.inputContainer}>
-          <TextInput 
-          value={textInput}
-          onChangeText={(text)=>setTextInput(text)}
-          placeholder='Add your item.' />
-        </View>
-        <TouchableOpacity onPress={()=>{addToList()}}>
-          <View style={styles.iconContainer}>
-            <Icon name="add" color="#fff" size={25} />
+        <View style={styles.footer}>
+          <View style={styles.inputContainer}>
+            <TextInput 
+            value={textInput}
+            onChangeText={(text)=>setTextInput(text)}
+            placeholder='Add your item.' />
           </View>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={()=>{addToList()}}>
+            <View style={styles.iconContainer}>
+              <Icon name="add" color="#fff" size={25} />
+            </View>
+          </TouchableOpacity>
+        </View>
     </SafeAreaView>
   );
 }
@@ -175,7 +184,8 @@ const styles = StyleSheet.create({
     flexDirection:'row',
     alignItems:'center',
     paddingHorizontal: 12,
-    elevation:40
+    paddingBottom:10,
+    marginVertical:0
   },
   inputContainer:{
     height:50,
@@ -202,7 +212,7 @@ const styles = StyleSheet.create({
     elevation:3,
     backgroundColor:COLORS.white,
     flexDirection: 'row',
-    marginVertical:7,
+    marginVertical:6,
     marginHorizontal:15,
     borderRadius:7,
   },
@@ -214,5 +224,10 @@ const styles = StyleSheet.create({
     alignItems:'center',
     justifyContent:'center',
     marginLeft:5
+  },
+  emptyContainer:{
+    flex:1,
+    alignItems:'center',
+    justifyContent:'center'
   }
 });
