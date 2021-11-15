@@ -2,13 +2,16 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AutoScrollFlatList} from "react-native-autoscroll-flatlist";
-import { Alert, FlatList, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View, Image } from 'react-native';
 
 
 const COLORS = {
   primary: '#444',
   white: "#fff"
 }
+// banner - 	ca-app-pub-3940256099942544/6300978111
+
+
 
 export default function App() {
   const [textInput, setTextInput] = React.useState('');
@@ -51,7 +54,7 @@ const getListFromUserDevice = async () =>{
 // adding new item to list
 const addToList = () =>{
   if(textInput == ''){
-    Alert.alert("Cannot Add","Add an item first.")
+    Alert.alert("Sorry","Add an item first :)")
   } else{
     const newList = {
       id: Math.random(),
@@ -91,6 +94,7 @@ const clearAllItems = () =>{
 }
 
 
+
 // ListItem's components
 const ListItem = ({list}) =>{
   return <View style={styles.listItem}>
@@ -115,9 +119,10 @@ const ListItem = ({list}) =>{
     <SafeAreaView style={styles.container}>
       {/* === header === */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>
-          Bazar list
-        </Text>
+        <View style={styles.logoWithTextWrapper}>
+          <Image style={{height:40, width:40}} source={require('./assets/icon.png')} />
+          <Text style={styles.headerText} >Bazar List</Text>
+        </View>
         {
           list != '' && <Icon  name="delete" size={23} color='red' onPress={()=> clearAllItems() } />
         }
@@ -126,7 +131,9 @@ const ListItem = ({list}) =>{
 
       {
         list == '' &&  <View style={styles.emptyContainer}> 
-                          <Text style={{fontSize: 20, color: '#555'}}>No Items</Text>
+                          <Image style={styles.addItemLogo} source={require('./assets/box.png')} />
+                          <Text style={{fontSize: 20, color: '#555', marginVertical:10}}>No Items</Text>
+                          <Text  style={{fontSize: 12, color: '#444', marginVertical:10, position:'absolute', bottom:0}}>Made By Prince</Text>
                        </View>
       }
      
@@ -139,6 +146,7 @@ const ListItem = ({list}) =>{
           contentContainerStyle={{paddingBottom:120}}
       />
     
+ 
       {/* === footer === */}
         <View style={styles.footer}>
           <View style={styles.inputContainer}>
@@ -163,24 +171,32 @@ const styles = StyleSheet.create({
   container: {
     marginTop:30,
     flex: 1,
-    backgroundColor: '#ffdd00'
+    backgroundColor: '#222'
+  },
+  logoWithTextWrapper:{
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
   },
   header:{
     alignItems:'center',
-    padding:15,
+    padding:13,
     flexDirection:'row',
     justifyContent:'space-between',
+    backgroundColor:'#ffdd00',
+    elevation:10
   },
   headerText:{
-    fontSize:20,
+    fontSize:17,
     fontWeight: 'bold',
-    color: COLORS.primary
+    color: COLORS.primary,
+    paddingLeft:10
   },
   footer:{
     width:'100%',
     position:"absolute",
     bottom:0,
-    backgroundColor: '#ffdd00',
+    backgroundColor: '#333',
     flexDirection:'row',
     alignItems:'center',
     paddingHorizontal: 12,
@@ -201,7 +217,7 @@ const styles = StyleSheet.create({
   iconContainer:{
     height:50,
     width:50,
-    backgroundColor:COLORS.primary,
+    backgroundColor:'#43b65c',
     borderRadius:25,
     alignItems:"center",
     justifyContent:"center",
@@ -210,7 +226,7 @@ const styles = StyleSheet.create({
   listItem:{
     padding:15,
     elevation:3,
-    backgroundColor:COLORS.white,
+    backgroundColor:'#FFFAF7',
     flexDirection: 'row',
     marginVertical:6,
     marginHorizontal:15,
@@ -219,15 +235,20 @@ const styles = StyleSheet.create({
   actionIcon:{
     height:25,
     width:25,
-    backgroundColor: 'green',
+    backgroundColor: '#43b65c',
     borderRadius: 3,
     alignItems:'center',
     justifyContent:'center',
     marginLeft:5
   },
   emptyContainer:{
-    flex:1,
+    flex:2,
     alignItems:'center',
-    justifyContent:'center'
+    justifyContent:'center',
+  },
+  addItemLogo:{
+    height:100,
+    width:100,
+    opacity:0.5
   }
 });
