@@ -4,13 +4,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AutoScrollFlatList} from "react-native-autoscroll-flatlist";
 import { Alert, FlatList, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View, Image } from 'react-native';
 
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded,
+  setTestDeviceIDAsync,
+} from 'expo-ads-admob';
 
 const COLORS = {
   primary: '#444',
   white: "#fff"
 }
-// banner - 	ca-app-pub-3940256099942544/6300978111
 
+// interstitial ad
+const interstitial = async () =>{
+  await AdMobInterstitial.setAdUnitID('ca-app-pub-5240090040309390/3240091686');
+  try{
+    await AdMobInterstitial.requestAdAsync();
+    await AdMobInterstitial.showAdAsync();
+  }catch (error){
+    console.log(error)
+  }
+  
+}
 
 
 export default function App() {
@@ -87,8 +104,14 @@ const deleteItem = (itemId) =>{
 const clearAllItems = () =>{
   Alert.alert('Confirm', 'Are you sure? You want to delete all items.', 
   [
-    {text:'No'},
-    {text:'Yes', onPress: ()=> {setList([])}}
+    {text:'No', onPress: ()=> {
+      interstitial();
+    
+    }},
+    {text:'Yes', onPress: ()=> {
+      setList([]);
+       interstitial();
+      }}
   
 ])
 }
@@ -143,10 +166,16 @@ const ListItem = ({list}) =>{
           showsVerticalScrollIndicator={false}
           data={list}
           renderItem={({item})=> <ListItem list={item} /> }
-          contentContainerStyle={{paddingBottom:120}}
+          contentContainerStyle={{paddingBottom:30}}
       />
+
+    <AdMobBanner
+      style={{marginBottom:80}}
+      bannerSize="fullBanner"
+      adUnitID="ca-app-pub-5240090040309390/2963268826" 
+      onDidFailToReceiveAdWithError={(e)=> console.log(e)} />
     
- 
+
       {/* === footer === */}
         <View style={styles.footer}>
           <View style={styles.inputContainer}>
@@ -169,9 +198,10 @@ const ListItem = ({list}) =>{
 
 const styles = StyleSheet.create({
   container: {
-    marginTop:30,
+    marginTop:25,
     flex: 1,
-    backgroundColor: '#222'
+    backgroundColor: '#222',
+    color:'#fff'
   },
   logoWithTextWrapper:{
     flexDirection:'row',
@@ -180,11 +210,13 @@ const styles = StyleSheet.create({
   },
   header:{
     alignItems:'center',
-    padding:13,
+    paddingVertical:10,
+    paddingHorizontal:13,
+    marginTop:0,
     flexDirection:'row',
     justifyContent:'space-between',
     backgroundColor:'#ffdd00',
-    elevation:10
+    elevation:10,
   },
   headerText:{
     fontSize:17,
