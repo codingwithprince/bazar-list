@@ -2,7 +2,7 @@
   "expo": {
     "name": "Bazar List",
     "slug": "bazar-list",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -24,10 +24,11 @@
         "googleMobileAdsAppId": "ca-app-pub-5240090040309390~6005855822" 
       },
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.codingwithprince.bazarlist"
+      "package": "com.codingwithprince.bazarlist",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"

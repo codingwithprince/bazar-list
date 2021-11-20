@@ -18,6 +18,7 @@ const COLORS = {
 }
 
 // interstitial ad
+
 const interstitial = async () =>{
   await AdMobInterstitial.setAdUnitID('ca-app-pub-5240090040309390/3240091686');
   try{
