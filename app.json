@@ -20,18 +20,33 @@
       "supportsTablet": true
     },
     "android": {
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-5240090040309390~6005855822" 
-      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.codingwithprince.bazarlist",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "28fc0738-5815-4f4a-9854-8afa1d4ebe3b"
+      }
     }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-5240090040309390~6005855822"
   }
 }

@@ -1,48 +1,67 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AutoScrollFlatList} from "react-native-autoscroll-flatlist";
-import { Alert, FlatList, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View, Image } from 'react-native';
-
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View, Image, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'
+import "expo-dev-client";
 import {
-  AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
-  setTestDeviceIDAsync,
-} from 'expo-ads-admob';
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+  mobileAds,
+  InterstitialAd,
+  AdEventType
+} from "react-native-google-mobile-ads";
+
 
 const COLORS = {
   primary: '#444',
   white: "#fff"
 }
 
-// interstitial ad
 
-const interstitial = async () =>{
-  await AdMobInterstitial.setAdUnitID('ca-app-pub-5240090040309390/3240091686');
-  try{
-    await AdMobInterstitial.requestAdAsync();
-    await AdMobInterstitial.showAdAsync();
-  }catch (error){
-    console.log(error)
-  }
-  
-}
 
 
 export default function App() {
   const [textInput, setTextInput] = React.useState('');
   const [list, setList] = React.useState([]);
 
-React.useEffect(()=>{
+  const [loaded, setLoaded] = useState(false);
+
+  const bannerId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-5240090040309390/2963268826';
+  const INTERSTITIAL_ID =  __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-5240090040309390/3240091686';
+
+  const interstitial = InterstitialAd.createForAdRequest(INTERSTITIAL_ID, {
+    requestNonPersonalizedAdsOnly: true,
+    keywords: ['fashion', 'clothing'],
+  });
+
+useEffect(()=>{
   getListFromUserDevice(list);
 }, [])
 
-React.useEffect(()=>{
+useEffect(()=>{
   saveListToUsersDevice(list);
 },[list])
 
+// ad show
+useEffect(() => {
+  setInterval(() => {
+    interstitial.addAdEventListener(AdEventType.LOADED, () => {
+      setLoaded(true);
+    });
+
+    interstitial.load();
+  }, 30000);
+
+  setInterval(() => {
+    if (interstitial.loaded) {
+      interstitial.show();
+    } else {
+      console.log("not loaded maybe");
+    }
+  }, 180000);
+}, []);
 
 // saving list items to users device
 const saveListToUsersDevice = async list =>{
@@ -72,7 +91,7 @@ const getListFromUserDevice = async () =>{
 // adding new item to list
 const addToList = () =>{
   if(textInput == ''){
-    Alert.alert("Sorry","Add an item first :)")
+    ToastAndroid.show('Type something....', ToastAndroid.SHORT);
   } else{
     const newList = {
       id: Math.random(),
@@ -106,12 +125,20 @@ const clearAllItems = () =>{
   Alert.alert('Confirm', 'Are you sure? You want to delete all items.', 
   [
     {text:'No', onPress: ()=> {
-      interstitial();
+      if (interstitial.loaded) {
+        interstitial.show();
+      } else {
+        console.log("not loaded maybe");
+      }
     
     }},
     {text:'Yes', onPress: ()=> {
       setList([]);
-       interstitial();
+      if (interstitial.loaded) {
+        interstitial.show();
+      } else {
+        console.log("not loaded maybe");
+      }
       }}
   
 ])
@@ -157,26 +184,31 @@ const ListItem = ({list}) =>{
         list == '' &&  <View style={styles.emptyContainer}> 
                           <Image style={styles.addItemLogo} source={require('./assets/box.png')} />
                           <Text style={{fontSize: 20, color: '#555', marginVertical:10}}>No Items</Text>
-                          <Text  style={{fontSize: 12, color: '#444', marginVertical:10, position:'absolute', bottom:0}}>Made By Prince</Text>
+                          <Text  style={{fontSize: 12, color: '#444'}}>Made By Prince</Text>
                        </View>
       }
      
       {/* === List items === */}
       
-      <AutoScrollFlatList
+      <FlatList
           showsVerticalScrollIndicator={false}
           data={list}
           renderItem={({item})=> <ListItem list={item} /> }
           contentContainerStyle={{paddingBottom:30}}
+          keyExtractor={(item) => item.task}
+          showsVerticalScrollIndicator={false}
       />
 
-    <AdMobBanner
-      style={{marginBottom:80}}
-      bannerSize="fullBanner"
-      adUnitID="ca-app-pub-5240090040309390/2963268826" 
-      onDidFailToReceiveAdWithError={(e)=> console.log(e)} />
-    
-
+      <View style={styles.bannerAd}>
+      <BannerAd
+        unitId={bannerId}
+        size={BannerAdSize.BANNER}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+        }}
+      /> 
+      </View>
+      
       {/* === footer === */}
         <View style={styles.footer}>
           <View style={styles.inputContainer}>
@@ -191,6 +223,7 @@ const ListItem = ({list}) =>{
             </View>
           </TouchableOpacity>
         </View>
+       
     </SafeAreaView>
   );
 }
@@ -199,10 +232,10 @@ const ListItem = ({list}) =>{
 
 const styles = StyleSheet.create({
   container: {
-    marginTop:25,
     flex: 1,
     backgroundColor: '#222',
-    color:'#fff'
+    color:'#fff',
+    justifyContent: 'space-between',
   },
   logoWithTextWrapper:{
     flexDirection:'row',
@@ -227,14 +260,15 @@ const styles = StyleSheet.create({
   },
   footer:{
     width:'100%',
-    position:"absolute",
-    bottom:0,
     backgroundColor: '#333',
     flexDirection:'row',
     alignItems:'center',
-    paddingHorizontal: 12,
-    paddingBottom:10,
+    paddingHorizontal: 10,
+    paddingBottom:5,
     marginVertical:0
+  },
+  bannerAd :{
+    width:'100%',
   },
   inputContainer:{
     height:50,
@@ -275,9 +309,10 @@ const styles = StyleSheet.create({
     marginLeft:5
   },
   emptyContainer:{
-    flex:2,
+    display: 'flex',
     alignItems:'center',
     justifyContent:'center',
+    marginTop: 5,
   },
   addItemLogo:{
     height:100,
